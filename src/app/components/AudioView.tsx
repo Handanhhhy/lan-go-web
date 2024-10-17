@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useEffect, useRef } from 'react';
 import { Howl } from 'howler';
-import ToggleButton from './AudioBtns'; 
+import ToggleButton from './AudioBtns';
 
 const AudioPlayer: React.FC = () => {
     const [sound, setSound] = useState<Howl | null>(null);
@@ -74,7 +74,7 @@ const AudioPlayer: React.FC = () => {
             const offsetX = e.clientX - rect.left;
             const newProgress = Math.min(Math.max(0, offsetX / rect.width), 1);
             dragProgress.current = newProgress;
-            const newTime = newProgress * duration;
+            // const newTime = newProgress * duration;
             setProgress(newProgress * 100);
             // 不改变 currentTime 或 sound.seek()，仅更新视觉反馈
         }
@@ -86,6 +86,18 @@ const AudioPlayer: React.FC = () => {
             const newTime = dragProgress.current * duration;
             sound.seek(newTime);
             setCurrentTime(newTime);
+        }
+    };
+
+    const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (progressBarRef.current && sound && duration > 0) {
+            const rect = progressBarRef.current.getBoundingClientRect();
+            const offsetX = e.clientX - rect.left;
+            const newProgress = Math.min(Math.max(0, offsetX / rect.width), 1);
+            const newTime = newProgress * duration;
+            sound.seek(newTime);
+            setCurrentTime(newTime);
+            setProgress(newProgress * 100);
         }
     };
 
@@ -106,6 +118,7 @@ const AudioPlayer: React.FC = () => {
                 ref={progressBarRef}
                 className="w-full bg-gray-200 h-2 rounded-full mt-4 cursor-pointer select-none"
                 onMouseDown={handleMouseDown}
+                onClick={handleProgressClick}
             >
                 <div
                     className="bg-blue-500 h-2 rounded-full"
