@@ -1,35 +1,123 @@
 'use client'
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Howl } from 'howler';
-import ToggleButton from './AudioBtns';
+import ToggleButton from './AudioBtns'; 
 
-const AudioView = () => {
+const AudioPlayer: React.FC = () => {
     const [sound, setSound] = useState<Howl | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
+    const [progress, setProgress] = useState(0);
+    const [currentTime, setCurrentTime] = useState(0);
+    const [duration, setDuration] = useState(0);
+    const progressBarRef = useRef<HTMLDivElement>(null);
+    const isDragging = useRef(false);
+    const dragProgress = useRef(0);
+
+    useEffect(() => {
+        const newSound = new Howl({
+            src: ['/bfsdla.mp3'],
+            volume: 0.5,
+            loop: false,
+            onplay: () => setIsPlaying(true),
+            onpause: () => setIsPlaying(false),
+            onend: () => setIsPlaying(false),
+            onload: function () {
+                setDuration(Math.floor(newSound.duration()));
+            }
+        });
+        setSound(newSound);
+
+        return () => {
+            newSound.unload();
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!sound) return;
+
+        const updateProgress = () => {
+            if (!isDragging.current) {
+                const currentSeek = sound.seek() as number;
+                setCurrentTime(Math.floor(currentSeek));
+                setProgress((currentSeek / duration) * 100);
+            }
+        };
+
+        const timer = setInterval(updateProgress, 1000);
+
+        return () => clearInterval(timer);
+    }, [sound, duration]);
 
     const togglePlay = () => {
-        if (!sound) {
-            const newSound = new Howl({
-                src: '/80s_vibe.mp3',
-            });
-            setSound(newSound);
-            newSound.play();
-            console.log("new");
-        } else {
+        if (sound) {
             if (isPlaying) {
                 sound.pause();
             } else {
                 sound.play();
             }
         }
-        setIsPlaying(!isPlaying);
     };
 
+    const formatTime = (seconds: number) => {
+        const minutes = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+    };
+
+    const handleMouseDown = () => {
+        isDragging.current = true;
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+        if (isDragging.current && progressBarRef.current && sound && duration > 0) {
+            const rect = progressBarRef.current.getBoundingClientRect();
+            const offsetX = e.clientX - rect.left;
+            const newProgress = Math.min(Math.max(0, offsetX / rect.width), 1);
+            dragProgress.current = newProgress;
+            const newTime = newProgress * duration;
+            setProgress(newProgress * 100);
+            // 不改变 currentTime 或 sound.seek()，仅更新视觉反馈
+        }
+    };
+
+    const handleMouseUp = () => {
+        if (isDragging.current && sound) {
+            isDragging.current = false;
+            const newTime = dragProgress.current * duration;
+            sound.seek(newTime);
+            setCurrentTime(newTime);
+        }
+    };
+
+    useEffect(() => {
+        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mouseup', handleMouseUp);
+
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, [duration, sound]);
+
     return (
-        <div>
-            <ToggleButton isPlaying={isPlaying} togglePlay={togglePlay}></ToggleButton>
+        <div className="p-4 max-w-md mx-auto bg-white rounded-lg shadow-md">
+            <ToggleButton isPlaying={isPlaying} togglePlay={togglePlay} />
+            <div
+                ref={progressBarRef}
+                className="w-full bg-gray-200 h-2 rounded-full mt-4 cursor-pointer select-none"
+                onMouseDown={handleMouseDown}
+            >
+                <div
+                    className="bg-blue-500 h-2 rounded-full"
+                    style={{ width: `${progress}%` }}
+                />
+            </div>
+            <div className="flex justify-between mt-2 text-sm text-gray-500">
+                <span>{formatTime(currentTime)}</span>
+                <span>{formatTime(duration)}</span>
+            </div>
         </div>
     );
 };
 
-export default AudioView;
+export default AudioPlayer;
