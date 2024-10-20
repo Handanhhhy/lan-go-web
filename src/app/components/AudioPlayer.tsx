@@ -2,8 +2,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Howl } from 'howler';
 import ToggleButton from './AudioBtns';
+import { trackProps } from '../interfaces/audio';
 
-const AudioPlayer: React.FC = () => {
+
+
+const AudioPlayer = (track : trackProps) => {
     const [sound, setSound] = useState<Howl | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -15,7 +18,7 @@ const AudioPlayer: React.FC = () => {
 
     useEffect(() => {
         const newSound = new Howl({
-            src: ['/bfsdla.mp3'],
+            src: [track.src],
             volume: 0.5,
             loop: false,
             onplay: () => setIsPlaying(true),
@@ -30,7 +33,7 @@ const AudioPlayer: React.FC = () => {
         return () => {
             newSound.unload();
         };
-    }, []);
+    }, [track.src]);
 
     useEffect(() => {
         if (!sound) return;
@@ -113,6 +116,7 @@ const AudioPlayer: React.FC = () => {
 
     return (
         <div className="p-4 max-w-md mx-auto bg-white rounded-lg shadow-md">
+            <span>{track.title}</span>
             <ToggleButton isPlaying={isPlaying} togglePlay={togglePlay} />
             <div
                 ref={progressBarRef}
@@ -126,8 +130,8 @@ const AudioPlayer: React.FC = () => {
                 />
             </div>
             <div className="flex justify-between mt-2 text-sm text-gray-500">
-                <span>{formatTime(currentTime)}</span>
-                <span>{formatTime(duration)}</span>
+                <label>{formatTime(currentTime)}</label>
+                <label>{formatTime(duration)}</label>
             </div>
         </div>
     );
