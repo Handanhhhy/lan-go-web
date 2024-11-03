@@ -29,21 +29,21 @@ const SentencePlayer = () => {
     const [sound, setSound] = useState<Howl | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
-    const [currentText, setCurrentText] = useState('');
     const [currentIndex, setCurrentIndex] = useState(0);
 
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
 
-    // 
     const [prevId, setPrevId] = useState<number | null>(null);
+
+    const [delay, setDelay] = useState(3000);
+    const [inputValue, setInputValue] = useState('3000');
+
 
     useEffect(() => {
         const newSound = new Howl({
             src: ['/test.mp3'],
             sprite: soundSpriteDefinitions,
-            // onplay: () => setIsPlaying(true),
-            // onpause: () => setIsPlaying(false),
             onend: () => setIsPlaying(false),
             onload: function () {
                 setDuration(Math.floor(newSound.duration()));
@@ -61,13 +61,11 @@ const SentencePlayer = () => {
 
         const currentSegment = audioSegments[key];
         if (currentSegment) {
-            setCurrentText(currentSegment.text);
             console.log(key);
             console.log(`sentence${key + 1}`);
             const id = sound.play(`sentence${key + 1}`); // 使用适当的 sprite key
             setPrevId(id);
-            // 等待当前片段播放完成，再等 3 秒
-            await new Promise(resolve => setTimeout(resolve, currentSegment.sprite[1] + 3000));
+            await new Promise(resolve => setTimeout(resolve, currentSegment.sprite[1] + delay));
         }
     };
 
@@ -135,10 +133,21 @@ const SentencePlayer = () => {
             setIsPlaying(true);
         }
     };
+
+    const handleChange = (event) => {
+        setInputValue(event.target.value);
+    };
+
+    const updateDelay = () => {
+        const parsedValue = parseInt(inputValue, 10);
+        if (!isNaN(parsedValue) && parsedValue > 0) {
+            setDelay(parsedValue);
+        }
+    };
+
     return (
         <div className="p-4 max-w-md mx-auto bg-white rounded-lg shadow-md">
 
-            {/* <span className="mb-2 text-lg font-semibold">{currentText}</span> */}
             <MarqueeText index={currentIndex}></MarqueeText>
             <div className="w-full flex items-center justify-between mb-4">
                 <button onClick={skipBackward} >
@@ -160,6 +169,18 @@ const SentencePlayer = () => {
                 <span>{formatTime(duration)}</span>
             </div>
             <i>        {isPlaying ? 'Pause' : 'Play'}</i>
+            <div>
+                <label>
+                    Set Delay (ms):
+                    <input
+                        type="number"
+                        value={inputValue}
+                        onChange={handleChange}
+                        onBlur={updateDelay}
+                    />
+                </label>
+                <p>Current delay: {delay} ms</p>
+            </div>
         </div>
     );
 };

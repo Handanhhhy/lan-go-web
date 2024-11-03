@@ -1,5 +1,6 @@
 import React from 'react';
 import AudioPlayer from './components/AudioPlayer';
+import SentencePlayer from './components/SentencePlayer';
 
 const songs = [
     {
@@ -20,7 +21,8 @@ const songs = [
 const HomePage = () => {
     return (
         <div>
-            <AudioPlayer src={songs[0].src} title={songs[0].title}></AudioPlayer>
+            {/* <AudioPlayer src={songs[0].src} title={songs[0].title}></AudioPlayer> */}
+            <SentencePlayer></SentencePlayer>
         </div>
     );
 };
