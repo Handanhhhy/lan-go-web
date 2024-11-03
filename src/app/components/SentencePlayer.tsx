@@ -2,32 +2,19 @@
 'use client'
 import React, { useState, useEffect, useRef } from 'react';
 import { Howl, SoundSpriteDefinitions } from 'howler';
-import { audioSegments } from './audioData';
+// import { audioSegments } from './audioData';
 import ToggleButton from './AudioBtns';
+import { AudioSegment, TrackProps } from '../interfaces/audioTypes';
+
 interface MarqueeTextProps {
     index: number;
 }
-function MarqueeText({ index }: MarqueeTextProps) {
-    // 检查 index 是否在有效范围内
-    if (index < 0 || index >= audioSegments.length) {
-        return <div className="marquee-content">Invalid index</div>;
-    }
 
-    return (
-        <div className="marquee">
-            <div className="marquee-content">{audioSegments[index].text}</div>
-        </div>
-    );
-}
-
-const soundSpriteDefinitions: SoundSpriteDefinitions = audioSegments.reduce((acc, segment, index) => {
-    acc[`sentence${index + 1}`] = segment.sprite;
-    return acc;
-}, {} as SoundSpriteDefinitions);
-
-const SentencePlayer = () => {
+const SentencePlayer = (track: TrackProps) => {
     const [sound, setSound] = useState<Howl | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
+    const [audioSegments, setAudioSegments] = useState<AudioSegment[]>([]);
+
     const [progress, setProgress] = useState(0);
     const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -39,22 +26,59 @@ const SentencePlayer = () => {
     const [delay, setDelay] = useState(3000);
     const [inputValue, setInputValue] = useState('3000');
 
+    useEffect(() => {
+        const fetchAudioSegments = async () => {
+            try {
+                const response = await fetch(track.dataUrl);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch audio segments');
+                }
+                const data: AudioSegment[] = await response.json();
+                setAudioSegments(data);
+            } catch (error) {
+                console.error('Error fetching audio segments:', error);
+            }
+        };
+
+        fetchAudioSegments();
+    }, [track.dataUrl]);
 
     useEffect(() => {
-        const newSound = new Howl({
-            src: ['/test.mp3'],
-            sprite: soundSpriteDefinitions,
-            onend: () => setIsPlaying(false),
-            onload: function () {
-                setDuration(Math.floor(newSound.duration()));
-            }
-        });
-        setSound(newSound);
+        if (audioSegments.length > 0) {
+            const soundSpriteDefinitions: SoundSpriteDefinitions = audioSegments.reduce((acc, segment, index) => {
+                acc[`sentence${index + 1}`] = segment.sprite;
+                return acc;
+            }, {} as SoundSpriteDefinitions);
 
-        return () => {
-            newSound.unload();
-        };
-    }, []);
+            const newSound = new Howl({
+                src: [track.src], // Use the actual track source
+                sprite: soundSpriteDefinitions,
+                onend: () => setIsPlaying(false),
+                onload: function () {
+                    setDuration(Math.floor(newSound.duration()));
+                }
+            });
+
+            setSound(newSound);
+
+            return () => {
+                newSound.unload();
+            };
+        }
+    }, [audioSegments, track.src]);
+
+    const MarqueeText = ({ index }: MarqueeTextProps) => {
+        if (index < 0 || index >= audioSegments.length) {
+            return <div className="marquee-content">Invalid index</div>;
+        }
+
+        return (
+            <div className="marquee">
+                <div className="marquee-content">{audioSegments[index].text}</div>
+            </div>
+        );
+    };
+
 
     const playSegment = async (key: number) => {
         if (!sound) return;

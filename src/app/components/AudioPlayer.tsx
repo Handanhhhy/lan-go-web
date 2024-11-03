@@ -2,11 +2,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Howl } from 'howler';
 import ToggleButton from './AudioBtns';
-import { trackProps } from '../interfaces/audio';
+import { TrackProps } from '../interfaces/audioTypes';
 
 
 
-const AudioPlayer = (track : trackProps) => {
+const AudioPlayer = (track : TrackProps) => {
     const [sound, setSound] = useState<Howl | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);

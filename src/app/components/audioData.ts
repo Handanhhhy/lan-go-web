@@ -1,9 +1,5 @@
 // audioData.ts
-
-type AudioSegment = {
-    sprite: [number, number];
-    text: string;
-};
+import { AudioSegment } from "../interfaces/audioTypes";
 
 export const audioSegments: AudioSegment[] = [
     { sprite: [0, 7000], text: "6 Minute English from bbclearningenglish.com" },
