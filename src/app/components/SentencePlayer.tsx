@@ -167,7 +167,7 @@ const SentencePlayer = (track: TrackProps) => {
 
     const skipBackward = () => {
         if (currentIndex > 0) {
-            setCurrentIndex(currentIndex + 1);
+            setCurrentIndex(currentIndex - 1);
             setIsPlaying(true);
         }
     };
