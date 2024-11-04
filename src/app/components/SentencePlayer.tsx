@@ -13,6 +13,7 @@ interface MarqueeTextProps {
 const SentencePlayer = (track: TrackProps) => {
     const [sound, setSound] = useState<Howl | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
+    const isPlayingLogic = useRef(false);
     const [audioSegments, setAudioSegments] = useState<AudioSegment[]>([]);
 
     const [progress, setProgress] = useState(0);
@@ -53,7 +54,11 @@ const SentencePlayer = (track: TrackProps) => {
             const newSound = new Howl({
                 src: [track.src], // Use the actual track source
                 sprite: soundSpriteDefinitions,
-                onend: () => setIsPlaying(false),
+                onend: () => {
+                    // setIsPlaying(false);
+                    // isPlayingLogic.current = false;
+                    console.log("sprite end")
+                },
                 onload: function () {
                     setDuration(Math.floor(newSound.duration()));
                 }
@@ -85,16 +90,20 @@ const SentencePlayer = (track: TrackProps) => {
 
         const currentSegment = audioSegments[key];
         if (currentSegment) {
-            console.log(key);
             console.log(`sentence${key + 1}`);
             const id = sound.play(`sentence${key + 1}`); // 使用适当的 sprite key
             setPrevId(id);
-            await new Promise(resolve => setTimeout(resolve, currentSegment.sprite[1] + delay));
+            await new Promise(resolve => setTimeout(resolve, currentSegment.sprite[1] + delay)).then(() => {
+                if (isPlayingLogic.current) {
+                    console.log("promise , id", prevId);
+                    skipForward();
+                }
+            });
         }
     };
 
     useEffect(() => {
-
+        console.log("logic:", isPlayingLogic, "render:", isPlaying);
         if (isPlaying && currentIndex < audioSegments.length) {
             pausePrev();
             playSegment(currentIndex);
@@ -136,10 +145,14 @@ const SentencePlayer = (track: TrackProps) => {
     const togglePlay = () => {
         if (sound) {
             if (isPlaying) {
+                console.log("toggle stop");
                 pausePrev();
                 setIsPlaying(false);
+                isPlayingLogic.current = false;
             } else {
+                console.log("toggle play");
                 setIsPlaying(true);
+                isPlayingLogic.current = true;
             }
         }
     };
@@ -148,6 +161,7 @@ const SentencePlayer = (track: TrackProps) => {
         if (currentIndex < audioSegments.length - 1) {
             setCurrentIndex(currentIndex + 1);
             setIsPlaying(true);
+            isPlayingLogic.current = true;
         }
     };
 
