@@ -12,6 +12,7 @@ export interface TrackProps {
 }
 
 export type AudioSegment = {
+    id: number,
     sprite: [number, number];
     text: string;
 };

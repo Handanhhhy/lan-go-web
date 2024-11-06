@@ -54,11 +54,6 @@ const SentencePlayer = (track: TrackProps) => {
             const newSound = new Howl({
                 src: [track.src], // Use the actual track source
                 sprite: soundSpriteDefinitions,
-                onend: () => {
-                    // setIsPlaying(false);
-                    // isPlayingLogic.current = false;
-                    console.log("sprite end")
-                },
                 onload: function () {
                     setDuration(Math.floor(newSound.duration()));
                 }
@@ -93,17 +88,20 @@ const SentencePlayer = (track: TrackProps) => {
             console.log(`sentence${key + 1}`);
             const id = sound.play(`sentence${key + 1}`); // 使用适当的 sprite key
             setPrevId(id);
-            await new Promise(resolve => setTimeout(resolve, currentSegment.sprite[1] + delay)).then(() => {
+            sound.on("end", () => {
                 if (isPlayingLogic.current) {
-                    console.log("promise , id", prevId);
-                    skipForward();
+                    setTimeout(() => {
+                        if (isPlayingLogic.current) {
+                            skipForward();
+                        }
+                    }, delay)
                 }
-            });
+            }, id);
+
         }
     };
 
     useEffect(() => {
-        console.log("logic:", isPlayingLogic, "render:", isPlaying);
         if (isPlaying && currentIndex < audioSegments.length) {
             pausePrev();
             playSegment(currentIndex);
@@ -112,7 +110,6 @@ const SentencePlayer = (track: TrackProps) => {
 
     const updateProgress = (spriteId: number) => {
         if (!sound) return;
-        console.log("previous id : ", spriteId);
         const currentSeek = sound.seek(spriteId) as number;
         setCurrentTime(Math.floor(currentSeek));
         setProgress((currentSeek / duration) * 100);
