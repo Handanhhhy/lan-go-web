@@ -1,18 +1,30 @@
+.sentence-player {
+  width: 90%;
+  max-width: 800px;
+  padding: 20px;
+  box-sizing: border-box;
+  margin: 0 auto;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
 .marquee {
   display: flex;
-  flex-direction: column; /* 使每个段落在单独一行上 */
-  overflow-y: auto; /* 启用垂直滚动 */
-  height: 300px; /* 可视区域高度 */
-  width: 100%; /* 宽度充满父容器 */
+  flex-direction: column;
+  overflow-y: auto;
+  width: 100%;
 }
 
 .marquee-content {
   padding: 10px;
   margin: 5px 0;
   border: 1px solid #ddd;
-  background-color: #f9f9f9;
+  background-color: #fff;
   transition: background-color 0.3s;
-  white-space: nowrap; /* 防止换行，确保每个段落在一行中显示完整 */
+  width: 100%;
+  box-sizing: border-box;
+  white-space: normal;
 }
 
 .marquee-content.current {

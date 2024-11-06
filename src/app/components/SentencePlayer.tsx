@@ -29,6 +29,11 @@ const SentencePlayer = (track: TrackProps) => {
     const [delay, setDelay] = useState(3000);
     const [inputValue, setInputValue] = useState('3000');
 
+    const windowSize = 5;
+    const [height, setHeight] = useState(0);
+    const additionalHeight = 260; 
+    const totalHeight = height + additionalHeight;
+
     useEffect(() => {
         const fetchAudioSegments = async () => {
             try {
@@ -70,6 +75,22 @@ const SentencePlayer = (track: TrackProps) => {
     }, [audioSegments, track.src]);
 
     const MarqueeText = ({ currentIndex, windowSize }: MarqueeTextProps) => {
+        const marqueeRef = useRef<HTMLDivElement>(null);
+
+        useEffect(() => {
+            if (marqueeRef.current) {
+                const marquee = marqueeRef.current;
+                const sentenceElements = marquee.querySelectorAll('.marquee-content');
+
+                let totalHeight = 0;
+                sentenceElements.forEach((element) => {
+                    totalHeight += element.clientHeight;
+                });
+
+                setHeight(totalHeight);
+            }
+        }, [currentIndex, windowSize]);
+
         if (currentIndex < 0 || currentIndex >= audioSegments.length) {
             return <div className="marquee-content">Invalid index</div>;
         }
@@ -78,7 +99,7 @@ const SentencePlayer = (track: TrackProps) => {
         const end = Math.min(audioSegments.length, start + windowSize);
 
         return (
-            <div className="marquee">
+            <div className="marquee" ref={marqueeRef}>
                 {audioSegments.slice(start, end).map((segment, index) => (
                     <div
                         key={segment.id}
@@ -193,9 +214,9 @@ const SentencePlayer = (track: TrackProps) => {
     };
 
     return (
-        <div className="p-4 max-w-md mx-auto bg-white rounded-lg shadow-md">
+        <div className="sentence-player" style={{ height: `${totalHeight}px` }}>
 
-            <MarqueeText currentIndex={currentIndex} windowSize={5}></MarqueeText>
+            <MarqueeText currentIndex={currentIndex} windowSize={windowSize}></MarqueeText>
             <div className="w-full flex items-center justify-between mb-4">
                 <button onClick={skipBackward} >
                     <i className="fas fa-backward">backward</i>
