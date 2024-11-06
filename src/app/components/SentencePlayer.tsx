@@ -2,13 +2,15 @@
 'use client'
 import React, { useState, useEffect, useRef } from 'react';
 import { Howl, SoundSpriteDefinitions } from 'howler';
-// import { audioSegments } from './audioData';
 import ToggleButton from './AudioBtns';
 import { AudioSegment, TrackProps } from '../interfaces/audioTypes';
+import './styles.css'
 
 interface MarqueeTextProps {
-    index: number;
+    currentIndex: number;
+    windowSize: number;
 }
+
 
 const SentencePlayer = (track: TrackProps) => {
     const [sound, setSound] = useState<Howl | null>(null);
@@ -67,14 +69,24 @@ const SentencePlayer = (track: TrackProps) => {
         }
     }, [audioSegments, track.src]);
 
-    const MarqueeText = ({ index }: MarqueeTextProps) => {
-        if (index < 0 || index >= audioSegments.length) {
+    const MarqueeText = ({ currentIndex, windowSize }: MarqueeTextProps) => {
+        if (currentIndex < 0 || currentIndex >= audioSegments.length) {
             return <div className="marquee-content">Invalid index</div>;
         }
 
+        const start = Math.max(0, currentIndex - Math.floor(windowSize / 2));
+        const end = Math.min(audioSegments.length, start + windowSize);
+
         return (
             <div className="marquee">
-                <div className="marquee-content">{audioSegments[index].text}</div>
+                {audioSegments.slice(start, end).map((segment, index) => (
+                    <div
+                        key={segment.id}
+                        className={`marquee-content ${index + start === currentIndex ? 'current' : ''}`}
+                    >
+                        {segment.text}
+                    </div>
+                ))}
             </div>
         );
     };
@@ -183,7 +195,7 @@ const SentencePlayer = (track: TrackProps) => {
     return (
         <div className="p-4 max-w-md mx-auto bg-white rounded-lg shadow-md">
 
-            <MarqueeText index={currentIndex}></MarqueeText>
+            <MarqueeText currentIndex={currentIndex} windowSize={5}></MarqueeText>
             <div className="w-full flex items-center justify-between mb-4">
                 <button onClick={skipBackward} >
                     <i className="fas fa-backward">backward</i>

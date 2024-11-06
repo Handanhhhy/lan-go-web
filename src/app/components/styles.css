@@ -1,0 +1,21 @@
+.marquee {
+  display: flex;
+  flex-direction: column; /* 使每个段落在单独一行上 */
+  overflow-y: auto; /* 启用垂直滚动 */
+  height: 300px; /* 可视区域高度 */
+  width: 100%; /* 宽度充满父容器 */
+}
+
+.marquee-content {
+  padding: 10px;
+  margin: 5px 0;
+  border: 1px solid #ddd;
+  background-color: #f9f9f9;
+  transition: background-color 0.3s;
+  white-space: nowrap; /* 防止换行，确保每个段落在一行中显示完整 */
+}
+
+.marquee-content.current {
+  color: red;
+  font-weight: bold;
+}
