@@ -1,6 +1,6 @@
 // SentencePlayer.tsx
 'use client'
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, } from 'react';
 import { Howl, SoundSpriteDefinitions } from 'howler';
 import ToggleButton from './AudioBtns';
 import { AudioSegment, TrackProps } from '../interfaces/audioTypes';
@@ -29,9 +29,9 @@ const SentencePlayer = (track: TrackProps) => {
     const [delay, setDelay] = useState(3000);
     const [inputValue, setInputValue] = useState('3000');
 
-    const windowSize = 5;
+    const windowSize = 7;
     const [height, setHeight] = useState(0);
-    const additionalHeight = 260; 
+    const additionalHeight = 260;
     const totalHeight = height + additionalHeight;
 
     useEffect(() => {

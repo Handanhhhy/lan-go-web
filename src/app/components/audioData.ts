@@ -1,5 +1,6 @@
 // audioData.ts
 import { AudioSegment } from "../interfaces/audioTypes";
+import { TrackProps } from '../interfaces/audioTypes';
 
 export const audioSegments: AudioSegment[] = [
     { id: 1, sprite: [0, 7000], text: "6 Minute English from bbclearningenglish.com" },
@@ -14,3 +15,27 @@ export const audioSegments: AudioSegment[] = [
     { id: 10, sprite: [70000, 8000], text: "a) salt and vinegar, b) cheese and onion, or c) prawn cocktail?" },
     { id: 11, sprite: [78000, 3000], text: "I'm going to guess cheese and onion." }
 ];
+
+export const songs: TrackProps[] = [
+    {
+        src: "/bfsdla.mp3",
+        title: "不分手的恋爱",
+        dataUrl: "/test.json"
+    },
+    {
+        src: "/80s_vibe.mp3",
+        title: "80s_vibe",
+        dataUrl: "/test.json"
+    },
+    {
+        src: "/test.mp3",
+        title: "six minutes english",
+        dataUrl: "/test.json"
+    },
+    {
+        src: "/Nov-15.mp3",
+        title: "CNN",
+        dataUrl: "/Nov-15.json"
+    },
+
+]
